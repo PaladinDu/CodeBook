@@ -50,14 +50,19 @@ class CodeBook:
                 char_count += 1
         ret.chars_count = char_count
         ret.index_to_char_map = ret.index_to_char_map[:char_count]
-        ret.encryption_map = [i for i in range(char_count)]
+        ret.encryption_map = [0 for _ in range(char_count)]
         ret.decryption_map = [0 for _ in range(char_count)]
-        for i in range(char_count):
-            rand = random.randint(0, char_count - i - 1)
-            tmp_code = ret.encryption_map[i]
-            ret.encryption_map[i] = ret.encryption_map[i+rand]
-            ret.encryption_map[i + rand] = tmp_code
-            ret.decryption_map[ret.encryption_map[i]] = i
+        tmp_chars = [i for i in range(char_count)]
+        set_char_index = 0
+        for i in range(char_count):  # 确保不会提前闭环
+            rand = 0
+            if i != char_count -1:
+                rand = random.randint(1, char_count - i - 1)
+
+            ret.encryption_map[set_char_index] = tmp_chars[rand]
+            ret.decryption_map[tmp_chars[rand]] = set_char_index
+            set_char_index = tmp_chars[rand]
+            tmp_chars[rand] = tmp_chars[char_count - i -1]
         return ret
 
     @staticmethod
@@ -151,7 +156,8 @@ class CodeBook:
                 j = len(key_bytes) - 1
             else:
                 j -= 1
-
+        l = [c for c in data_bytearray]
+        print(l)
         for i in range(len(data_bytearray), 0, -1):
             i = i - 1
             tmp_char_seed = 0
@@ -163,10 +169,14 @@ class CodeBook:
                 j = len(key_bytes) - 1
             else:
                 j -= 1
+        l = [c for c in data_bytearray]
+        print(l)
         for i in range(len(key_bytes)):
             i = len(key_bytes) - i -1
             data_index = i % len(data_bytearray)
             data_bytearray[data_index] = self._dechange(data_bytearray[data_index], key_bytes[i])
+        l = [c for c in data_bytearray]
+        print(l)
 
     def encryption(self, origin_data, key_bytes):
         data_bytearray = bytearray(origin_data)

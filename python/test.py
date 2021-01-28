@@ -68,8 +68,33 @@ def test_by_test_data(test_data_path):
                   code_book.decryption(encryption_data.encode("utf8"), key).decode("utf8"))
 
 
+def get_code_by_incr(codebook:CodeBook,num):
+    count = len("ACDEFGHJKLMNPQRSTUVWXYZ23456789")
+    tmp = bytearray("12345678".encode("utf8"))
+    tmp_c = 0
+    tmp_c2 = 0
+    for i in range(8):
+        tmp_c3 = tmp_c2
+        tmp_c2 = tmp_c
+        tmp_c = (num+tmp_c+tmp_c3) % count
+        tmp[i] = tmp_c
+
+        tmp[i] = codebook.index_to_char_map[tmp[i]]
+        num = num//count
+    ret = bytes(tmp)
+    return ret
+
+
 if __name__ == "__main__":
-    test_data_save_path= "e://cbtest.txt"
-    test_by_test_data(test_data_save_path)
-    test_random_data(test_data_save_path)
-    test_by_test_data(test_data_save_path)
+    # test_data_save_path= "e://cbtest.txt"
+    # test_by_test_data(test_data_save_path)
+    # test_random_data(test_data_save_path)
+    # test_by_test_data(test_data_save_path)
+    code_book = CodeBook.init_from_valid_chars("ACDEFGHJKLMNPQRSTUVWXYZ23456789".encode("utf8"))
+    meta = code_book.get_mate_data().decode("utf8")
+    print(meta)
+    key = code_book.init_seed("coconut".encode("utf8"))
+    for i in range(10000):
+        code = get_code_by_incr(code_book,i)
+        print(code.decode("utf8"))
+        print(code_book.encryption(code,key).decode("utf8"))
